@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace Simulation.Objects
+{
+    public class Scene
+    {
+        public double WIDTH { get; private set; }
+        public double HEIGHT { get; private set; }
+        public void Resize(double width, double height) =>
+        (WIDTH, HEIGHT) = (width, height);
+
+        public HashSet<Truck> fleet { get; private set; }
+    }
+}
