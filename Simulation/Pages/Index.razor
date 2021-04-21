@@ -12,36 +12,69 @@
     <BECanvas @ref="CanvasRef" Height="600" Width="400"></BECanvas>
 </div>
 
-    @code {
+@code {
+    private readonly int BALL_RADIUS = 20;
 
-        protected BECanvasComponent CanvasRef;
-        private Canvas2DContext ctx;
+    protected BECanvasComponent CanvasRef;
+    private Canvas2DContext ctx;
 
-        private readonly Scene scene = new Scene();
+    private Scene scene { get; set; }
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            this.ctx = await CanvasRef.CreateCanvas2DAsync();
-            await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
-            await base.OnInitializedAsync();
-        }
+    protected override void OnInitialized()
+    {
+        INotificationQueue q = new NotificationQueue();
+        ITruckFactory tf = new TruckFactory(q);
+        this.scene = new Scene(tf);
 
-        [JSInvokable]
-        public void ResizeInBlazor(double width, double height) => scene.Resize(width, height);
-
-        [JSInvokable]
-        public async ValueTask RenderInBlazor(float timeStamp)
-        {
-            await this.ctx.BeginBatchAsync();
-            await this.renderPath();
-            await this.ctx.EndBatchAsync();
-        }
-
-        private async Task renderPath()
-        {
-            await this.ctx.SetFillStyleAsync("green");
-            await this.ctx.FillRectAsync(0, scene.HEIGHT / 2, scene.WIDTH - 60, 60);
-            await this.ctx.SetFillStyleAsync("green");
-            await this.ctx.FillRectAsync(scene.WIDTH / 2, 0, 60, scene.HEIGHT - 60);
-        }
+        base.OnInitialized();
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        this.ctx = await CanvasRef.CreateCanvas2DAsync();
+        await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
+        await base.OnInitializedAsync();
+    }
+
+    [JSInvokable]
+    public void ResizeInBlazor(double width, double height) => scene.Resize(width, height);
+
+    [JSInvokable]
+    public async ValueTask RenderInBlazor(float timeStamp)
+    {
+        await this.ctx.BeginBatchAsync();
+        await this.renderPath();
+        await this.renderLocations();
+        await this.ctx.EndBatchAsync();
+    }
+
+    private async Task renderTrucks()
+    {
+
+    }
+
+    private async Task renderLocations()
+    {
+        await this.createCircle(BALL_RADIUS, (scene.HEIGHT / 2) + (BALL_RADIUS + 10), "red");
+        await this.createCircle((scene.WIDTH / 2) + (BALL_RADIUS + 10), BALL_RADIUS, "yellow");
+        await this.createCircle(scene.WIDTH - 60 - BALL_RADIUS, (scene.HEIGHT / 2) + (BALL_RADIUS + 10), "blue");
+        await this.createCircle((scene.WIDTH / 2) + (BALL_RADIUS + 10), scene.HEIGHT - BALL_RADIUS - 60, "orange");
+    }
+
+    private async Task renderPath()
+    {
+        await this.ctx.SetFillStyleAsync("green");
+        await this.ctx.FillRectAsync(0, scene.HEIGHT / 2, scene.WIDTH - 60, 60);
+        await this.ctx.SetFillStyleAsync("green");
+        await this.ctx.FillRectAsync(scene.WIDTH / 2, 0, 60, scene.HEIGHT - 60);
+    }
+
+    private async Task createCircle(double positionX, double positionY, string color)
+    {
+        await this.ctx.BeginPathAsync();
+        await this.ctx.ArcAsync(positionX, positionY, BALL_RADIUS, 0, 2 * Math.PI, false);
+        await this.ctx.SetFillStyleAsync(color);
+        await this.ctx.FillAsync();
+        await this.ctx.StrokeAsync();
+    }
+}

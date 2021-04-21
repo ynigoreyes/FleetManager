@@ -11,5 +11,11 @@ namespace Simulation.Objects
         (WIDTH, HEIGHT) = (width, height);
 
         public HashSet<Truck> fleet { get; private set; }
+
+        public Scene(ITruckFactory factory)
+        {
+            Fleet fleetManager = new(4, factory);
+            this.fleet = fleetManager.fleet;
+        }
     }
 }
