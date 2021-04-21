@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Blazor.Extensions;
 using Microsoft.AspNetCore.Components;
 using Simulation.DataContracts;
+using Simulation.Shared;
 
 namespace Simulation.Objects
 {
@@ -53,6 +54,9 @@ namespace Simulation.Objects
                 {
                     positionY += 1;
                 }
+            } else
+            {
+                destination = Tuple.Create<double, double>(GlobalSettings.OriginCoord.Item1, GlobalSettings.OriginCoord.Item2);
             }
 
             return;

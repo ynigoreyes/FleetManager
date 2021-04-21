@@ -70,9 +70,25 @@
     private async Task renderPath()
     {
         await this.ctx.SetFillStyleAsync("green");
+        await this.ctx.FillRectAsync(0, GlobalSettings.HEIGHT / 2, GlobalSettings.WIDTH, 60);
+        await this.ctx.SetFillStyleAsync("green");
+        await this.ctx.FillRectAsync(GlobalSettings.WIDTH / 2, 0, 60, GlobalSettings.HEIGHT);
+        await this.ctx.SetFillStyleAsync("green");
+        await this.ctx.FillRectAsync(0, 0, GlobalSettings.WIDTH, 60);
+        await this.ctx.SetFillStyleAsync("green");
+        await this.ctx.FillRectAsync(0, 0, 60, GlobalSettings.HEIGHT);
+        await this.ctx.SetFillStyleAsync("green");
+        await this.ctx.FillRectAsync(GlobalSettings.WIDTH, 0, 60, GlobalSettings.HEIGHT);
+        await this.ctx.SetFillStyleAsync("green");
+        await this.ctx.FillRectAsync(0, GlobalSettings.HEIGHT, GlobalSettings.WIDTH + 60, 60);
+        @*await this.ctx.SetFillStyleAsync("green");
         await this.ctx.FillRectAsync(0, GlobalSettings.HEIGHT / 2, GlobalSettings.WIDTH - 60, 60);
         await this.ctx.SetFillStyleAsync("green");
         await this.ctx.FillRectAsync(GlobalSettings.WIDTH / 2, 0, 60, GlobalSettings.HEIGHT - 60);
+        await this.ctx.SetFillStyleAsync("green");
+        await this.ctx.FillRectAsync(0, GlobalSettings.HEIGHT / 2, GlobalSettings.WIDTH - 60, 60);
+        await this.ctx.SetFillStyleAsync("green");
+        await this.ctx.FillRectAsync(GlobalSettings.WIDTH / 2, 0, 60, GlobalSettings.HEIGHT - 60);*@
     }
 
     private async Task createCircle(double positionX, double positionY, string color, double radiusSize = 20)
