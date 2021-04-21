@@ -6,14 +6,14 @@
 @using Blazor.Extensions.Canvas
 @namespace Simulation.Pages
 @inject IJSRuntime JsRuntime;
+@using Simulation.Shared
 
 @* follow this link for how to do animations https://swharden.com/blog/2021-01-07-blazor-canvas-animated-graphics/*@
 <div id="canvasHolder" style="position: fixed; width: 100%; height: 100%">
-    <BECanvas @ref="CanvasRef" Height="600" Width="400"></BECanvas>
+    <BECanvas @ref="CanvasRef" Height="@GlobalSettings.HEIGHT" Width="@GlobalSettings.WIDTH"></BECanvas>
 </div>
 
 @code {
-    private readonly int BALL_RADIUS = 20;
 
     protected BECanvasComponent CanvasRef;
     private Canvas2DContext ctx;
@@ -37,42 +37,48 @@
     }
 
     [JSInvokable]
-    public void ResizeInBlazor(double width, double height) => scene.Resize(width, height);
+    public void ResizeInBlazor(double width, double height) { }
 
     [JSInvokable]
     public async ValueTask RenderInBlazor(float timeStamp)
     {
+        this.scene.MoveTrucks();
+
         await this.ctx.BeginBatchAsync();
         await this.renderPath();
         await this.renderLocations();
+        await this.renderTrucks();
         await this.ctx.EndBatchAsync();
     }
 
     private async Task renderTrucks()
     {
-
+        foreach (var truck in this.scene.Fleet)
+        {
+            await this.createCircle(truck.positionX, truck.positionY, "black", 10);
+        }
     }
 
     private async Task renderLocations()
     {
-        await this.createCircle(BALL_RADIUS, (scene.HEIGHT / 2) + (BALL_RADIUS + 10), "red");
-        await this.createCircle((scene.WIDTH / 2) + (BALL_RADIUS + 10), BALL_RADIUS, "yellow");
-        await this.createCircle(scene.WIDTH - 60 - BALL_RADIUS, (scene.HEIGHT / 2) + (BALL_RADIUS + 10), "blue");
-        await this.createCircle((scene.WIDTH / 2) + (BALL_RADIUS + 10), scene.HEIGHT - BALL_RADIUS - 60, "orange");
+        await this.createCircle(GlobalSettings.OriginCoord.Item1, GlobalSettings.OriginCoord.Item2, "red");
+        await this.createCircle(GlobalSettings.RepairCoord.Item1, GlobalSettings.RepairCoord.Item2, "yellow");
+        await this.createCircle(GlobalSettings.Dest1Coord.Item1, GlobalSettings.Dest1Coord.Item2, "blue");
+        await this.createCircle(GlobalSettings.Dest2Coord.Item1, GlobalSettings.Dest2Coord.Item2, "orange");
     }
 
     private async Task renderPath()
     {
         await this.ctx.SetFillStyleAsync("green");
-        await this.ctx.FillRectAsync(0, scene.HEIGHT / 2, scene.WIDTH - 60, 60);
+        await this.ctx.FillRectAsync(0, GlobalSettings.HEIGHT / 2, GlobalSettings.WIDTH - 60, 60);
         await this.ctx.SetFillStyleAsync("green");
-        await this.ctx.FillRectAsync(scene.WIDTH / 2, 0, 60, scene.HEIGHT - 60);
+        await this.ctx.FillRectAsync(GlobalSettings.WIDTH / 2, 0, 60, GlobalSettings.HEIGHT - 60);
     }
 
-    private async Task createCircle(double positionX, double positionY, string color)
+    private async Task createCircle(double positionX, double positionY, string color, double radiusSize = 20)
     {
         await this.ctx.BeginPathAsync();
-        await this.ctx.ArcAsync(positionX, positionY, BALL_RADIUS, 0, 2 * Math.PI, false);
+        await this.ctx.ArcAsync(positionX, positionY, radiusSize, 0, 2 * Math.PI, false);
         await this.ctx.SetFillStyleAsync(color);
         await this.ctx.FillAsync();
         await this.ctx.StrokeAsync();

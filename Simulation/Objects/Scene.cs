@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Simulation.Shared;
 
 namespace Simulation.Objects
 {
@@ -10,12 +11,58 @@ namespace Simulation.Objects
         public void Resize(double width, double height) =>
         (WIDTH, HEIGHT) = (width, height);
 
-        public HashSet<Truck> fleet { get; private set; }
+        public HashSet<Truck> Fleet { get; private set; }
+        public List<Tuple<double, double>> availableDestinations = new List<Tuple<double, double>>() { GlobalSettings.Dest1Coord, GlobalSettings.Dest2Coord };
+
 
         public Scene(ITruckFactory factory)
         {
             Fleet fleetManager = new(4, factory);
-            this.fleet = fleetManager.fleet;
+            this.Fleet = fleetManager.fleet;
+
+            int truckRow = 0;
+            int truckNumber = 1;
+            double verticalOffset = 15;
+            double horizontalOffset = 30;
+            Boolean sideSwitch = true;
+
+            foreach (var truck in this.Fleet)
+            {
+                if (truckNumber >= 2 && truckNumber%2 == 0)
+                {
+                    truckRow += 1;
+                }
+
+                if (truckNumber == 1)
+                {
+                    truck.SetStartingPoint(GlobalSettings.FirstTruckStartingPoint.Item1 - (horizontalOffset * truckRow), GlobalSettings.FirstTruckStartingPoint.Item2);
+                } else
+                {
+                    if (sideSwitch)
+                    {
+                        truck.SetStartingPoint(GlobalSettings.FirstTruckStartingPoint.Item1 - (horizontalOffset * truckRow), GlobalSettings.FirstTruckStartingPoint.Item2 + verticalOffset);
+                    } else
+                    {
+                        truck.SetStartingPoint(GlobalSettings.FirstTruckStartingPoint.Item1 - (horizontalOffset * truckRow), GlobalSettings.FirstTruckStartingPoint.Item2 - verticalOffset);
+                    }
+                }
+
+                truckNumber += 1;
+                sideSwitch = !sideSwitch;
+
+                // Set Random Destination
+                var random = new Random();
+                int index = random.Next(availableDestinations.Count);
+                truck.SetDestination(availableDestinations[index].Item1, availableDestinations[index].Item2);
+            }
+        }
+
+        public void MoveTrucks()
+        {
+            foreach (var truck in this.Fleet)
+            {
+                truck.Move();
+            }
         }
     }
 }

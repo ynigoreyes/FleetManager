@@ -16,17 +16,6 @@ namespace Simulation.Objects
         {
             Truck newTruck = new Truck(notifQueue);
 
-            Locations randomLocation = Locations.Home;
-            Array allLocations = Enum.GetValues(typeof(Locations));
-
-            while (randomLocation.Equals(Locations.Home))
-            {    
-                Random random = new Random();
-                randomLocation = (Locations)allLocations.GetValue(random.Next(allLocations.Length));
-            }
-
-            newTruck.SetDestination(randomLocation);
-
             return newTruck;
         }
     }
