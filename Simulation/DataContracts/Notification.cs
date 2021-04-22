@@ -10,9 +10,12 @@ namespace Simulation.DataContracts
 
         private Notification nextNotif = null;
 
-        public Notification()
+        public Notification(NotificationType _type, string _message)
         {
             id = Guid.NewGuid();
+            notificationType = _type;
+            dateTime = DateTime.Now;
+            message = _message;
         }
 
         public void SetNextNotif(Notification notif)

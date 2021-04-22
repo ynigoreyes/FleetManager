@@ -14,24 +14,24 @@
 </div>
 
 @code {
+    private static INotificationQueue q = new NotificationQueue();
+    private static ITruckFactory tf = new TruckFactory(q);
 
-    protected BECanvasComponent CanvasRef;
+    private AdminPanel adminPanel;
+    private BECanvasComponent CanvasRef;
     private Canvas2DContext ctx;
-
     private Scene scene { get; set; }
 
     protected override void OnInitialized()
     {
-        INotificationQueue q = new NotificationQueue();
-        ITruckFactory tf = new TruckFactory(q);
         this.scene = new Scene(tf);
-
         base.OnInitialized();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         this.ctx = await CanvasRef.CreateCanvas2DAsync();
+        this.adminPanel = new AdminPanel(this.ctx, q, this.scene.Fleet);
         await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
         await base.OnInitializedAsync();
     }
@@ -44,10 +44,12 @@
     {
         this.scene.MoveTrucks();
 
+        await this.ctx.ClearRectAsync(0, 0, GlobalSettings.WIDTH, GlobalSettings.HEIGHT);
         await this.ctx.BeginBatchAsync();
         await this.renderPath();
         await this.renderLocations();
         await this.renderTrucks();
+        await this.adminPanel.RenderGraphics();
         await this.ctx.EndBatchAsync();
     }
 
@@ -81,14 +83,6 @@
         await this.ctx.FillRectAsync(GlobalSettings.WIDTH, 0, 60, GlobalSettings.HEIGHT);
         await this.ctx.SetFillStyleAsync("green");
         await this.ctx.FillRectAsync(0, GlobalSettings.HEIGHT, GlobalSettings.WIDTH + 60, 60);
-        @*await this.ctx.SetFillStyleAsync("green");
-        await this.ctx.FillRectAsync(0, GlobalSettings.HEIGHT / 2, GlobalSettings.WIDTH - 60, 60);
-        await this.ctx.SetFillStyleAsync("green");
-        await this.ctx.FillRectAsync(GlobalSettings.WIDTH / 2, 0, 60, GlobalSettings.HEIGHT - 60);
-        await this.ctx.SetFillStyleAsync("green");
-        await this.ctx.FillRectAsync(0, GlobalSettings.HEIGHT / 2, GlobalSettings.WIDTH - 60, 60);
-        await this.ctx.SetFillStyleAsync("green");
-        await this.ctx.FillRectAsync(GlobalSettings.WIDTH / 2, 0, 60, GlobalSettings.HEIGHT - 60);*@
     }
 
     private async Task createCircle(double positionX, double positionY, string color, double radiusSize = 20)

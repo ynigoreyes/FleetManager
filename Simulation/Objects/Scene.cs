@@ -12,7 +12,6 @@ namespace Simulation.Objects
         (WIDTH, HEIGHT) = (width, height);
 
         public HashSet<Truck> Fleet { get; private set; }
-        public List<Tuple<double, double>> availableDestinations = new List<Tuple<double, double>>() { GlobalSettings.Dest1Coord, GlobalSettings.Dest2Coord };
 
 
         public Scene(ITruckFactory factory)
@@ -50,10 +49,7 @@ namespace Simulation.Objects
                 truckNumber += 1;
                 sideSwitch = !sideSwitch;
 
-                // Set Random Destination
-                var random = new Random();
-                int index = random.Next(availableDestinations.Count);
-                truck.SetDestination(availableDestinations[index].Item1, availableDestinations[index].Item2);
+                truck.SetRandomDestination();
             }
         }
 
