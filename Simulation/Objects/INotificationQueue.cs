@@ -8,6 +8,5 @@ namespace Simulation.Objects
     {
         public IEnumerable<Notification> ReadAllNotifications();
         public void AddPersistentNotificatiion(Notification notif);
-        public void RemoveNotification(Guid notifId);
     }
 }

@@ -11,12 +11,13 @@ namespace Simulation.Objects
 {
     public partial class Truck : IEquatable<Truck>, IComparable<Truck>
     {
+        private static int numberOfTrucksCreated = 1;
         public INotificationQueue NotifQueue { get; private set; }
 
-        public Guid id { get; private set; }
+        public int id { get; private set; }
         public Tuple<double, double> destination { get; private set; }
         public DateTime createOn { get; private set; }
-        public NotificationType State { get; private set; }
+        public TruckStates State { get; private set; }
         public int Condition { get; private set; }
         private int waitTimer = 0;
 
@@ -26,12 +27,13 @@ namespace Simulation.Objects
         public Truck(INotificationQueue q)
         {
             NotifQueue = q;
-            id = Guid.NewGuid();
+            id = numberOfTrucksCreated;
             createOn = DateTime.Now;
             Condition = 100;
 
             positionX = -1;
             positionY = -1;
+            numberOfTrucksCreated++;
         }
 
         public void SetDestination(double destX, double destY)
@@ -91,38 +93,44 @@ namespace Simulation.Objects
 
             switch (State)
             {
-                case NotificationType.LeavingOrigin:
-                    State = NotificationType.AtDestination;
+                case TruckStates.LeavingOrigin:
+                    State = TruckStates.AtDestination;
+                    this.NotifQueue.AddPersistentNotificatiion(new Notification(TruckStates.AtDestination, $"Truck {this.id} has reached it's destination"));
                     break;
-                case NotificationType.NeedRepair:
-                    State = NotificationType.FinishedRepair;
+                case TruckStates.NeedRepair:
+                    State = TruckStates.FinishedRepair;
                     break;
-                case NotificationType.FinishedRepair:
+                case TruckStates.FinishedRepair:
                     destination = Tuple.Create(GlobalSettings.OriginCoord.Item1, GlobalSettings.OriginCoord.Item2);
                     Condition = 100;
-                    State = NotificationType.LeavingDestination;
+                    State = TruckStates.LeavingDestination;
+                    this.NotifQueue.AddPersistentNotificatiion(new Notification(TruckStates.FinishedRepair, $"Truck {this.id} has finished repairs"));
                     break;
-                case NotificationType.AtOrigin:
+                case TruckStates.AtOrigin:
                     Condition -= rnd.Next(5, 20);
                     this.SetRandomDestination();
-                    State = NotificationType.LeavingOrigin;
+                    State = TruckStates.LeavingOrigin;
+                    this.NotifQueue.AddPersistentNotificatiion(new Notification(TruckStates.LeavingOrigin, $"Truck {this.id} is leaving origin."));
                     break;
-                case NotificationType.AtDestination:
+                case TruckStates.AtDestination:
                     // Check if we need repairs before we go home
                     if (Condition < 90)
                     {
                         destination = Tuple.Create(GlobalSettings.RepairCoord.Item1, GlobalSettings.RepairCoord.Item2);
-                        State = NotificationType.NeedRepair;
+                        State = TruckStates.NeedRepair;
+                        this.NotifQueue.AddPersistentNotificatiion(new Notification(TruckStates.NeedRepair, $"Truck {this.id} needs repairs"));
                     } else
                     {
                         destination = Tuple.Create(GlobalSettings.OriginCoord.Item1, GlobalSettings.OriginCoord.Item2);
-                        State = NotificationType.LeavingDestination;
+                        State = TruckStates.LeavingDestination;
+                        this.NotifQueue.AddPersistentNotificatiion(new Notification(TruckStates.LeavingDestination, $"Truck {this.id} is heading back to origin"));
                     }
 
-                    waitTimer = rnd.Next(1, 4) * 100;
+                    waitTimer = rnd.Next(2, 6) * 100;
                     break;
-                case NotificationType.LeavingDestination:
-                    State = NotificationType.AtOrigin;
+                case TruckStates.LeavingDestination:
+                    State = TruckStates.AtOrigin;
+                    this.NotifQueue.AddPersistentNotificatiion(new Notification(TruckStates.AtOrigin, $"Truck {this.id} is has returned to origin"));
                     break;
                 default:
                     break;
@@ -131,9 +139,10 @@ namespace Simulation.Objects
 
         public void SetStartingPoint(double startX, double startY)
         {
-            this.State = NotificationType.LeavingOrigin;
+            this.State = TruckStates.LeavingOrigin;
             this.positionX = startX;
             this.positionY = startY;
+            this.NotifQueue.AddPersistentNotificatiion(new Notification(TruckStates.LeavingOrigin, $"Truck {this.id} is leaving origin."));
         }
 
         public int CompareTo(Truck other)

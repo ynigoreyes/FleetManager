@@ -6,44 +6,22 @@ namespace Simulation.Objects
 {
     public class NotificationQueue : INotificationQueue
     {
-        private Notification _mostRecentNotif = null;
+        private Queue<Notification> queue = new Queue<Notification>();
+        private readonly int BUFFER_SIZE = 10;
 
         public void AddPersistentNotificatiion(Notification notif)
         {
-            Notification temp = _mostRecentNotif;
-            _mostRecentNotif = notif;
-            notif.SetNextNotif(temp);
+            queue.Enqueue(notif);
+
+            if (queue.Count > BUFFER_SIZE)
+            {
+                queue.Dequeue();
+            }
         }
 
         public IEnumerable<Notification> ReadAllNotifications()
         {
-            List<Notification> notifications = new List<Notification>();
-            Notification tempNotif = _mostRecentNotif;
-            do
-            {
-                notifications.Add(tempNotif);
-                tempNotif = tempNotif.ReadNextNotification();
-            } while (tempNotif != null);
-
-            return notifications;
-        }
-
-        public void RemoveNotification(Guid notifId)
-        {
-            Notification tempCurrentNotif = _mostRecentNotif;
-            Notification nextNotif = tempCurrentNotif.ReadNextNotification();
-
-            while (nextNotif != null)
-            {
-                if (Equals(nextNotif.id, notifId))
-                {
-                    tempCurrentNotif.SetNextNotif(nextNotif.ReadNextNotification());
-                    return;
-                } else
-                {
-                    tempCurrentNotif = nextNotif;
-                }
-            }
+            return queue.ToArray();
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Simulation.Objects
 
         public Scene(ITruckFactory factory)
         {
-            Fleet fleetManager = new(4, factory);
+            Fleet fleetManager = new(8, factory);
             this.Fleet = fleetManager.fleet;
 
             int truckRow = 0;

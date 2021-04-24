@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Simulation.DataContracts
 {
-    public enum NotificationType
+    public enum TruckStates
     {
         NeedRepair,
         FinishedRepair,

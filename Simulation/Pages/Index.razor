@@ -48,6 +48,7 @@
         await this.ctx.BeginBatchAsync();
         await this.renderPath();
         await this.renderLocations();
+        await this.renderLocationLegend();
         await this.renderTrucks();
         await this.adminPanel.RenderGraphics();
         await this.ctx.EndBatchAsync();
@@ -67,6 +68,30 @@
         await this.createCircle(GlobalSettings.RepairCoord.Item1, GlobalSettings.RepairCoord.Item2, "yellow");
         await this.createCircle(GlobalSettings.Dest1Coord.Item1, GlobalSettings.Dest1Coord.Item2, "blue");
         await this.createCircle(GlobalSettings.Dest2Coord.Item1, GlobalSettings.Dest2Coord.Item2, "orange");
+    }
+
+    private async Task renderLocationLegend()
+    {
+        await this.createCircle(100, 600, "red");
+        await this.ctx.SetFontAsync("16px Roboto");
+        await this.ctx.SetFillStyleAsync("black");
+        await this.ctx.FillTextAsync($"Origin", 150, 600);
+
+
+        await this.createCircle(100, 650, "yellow");
+        await this.ctx.SetFontAsync("16px Roboto");
+        await this.ctx.SetFillStyleAsync("black");
+        await this.ctx.FillTextAsync($"Repair Shop", 150, 650);
+
+        await this.createCircle(100, 700, "blue");
+        await this.ctx.SetFontAsync("16px Roboto");
+        await this.ctx.SetFillStyleAsync("black");
+        await this.ctx.FillTextAsync($"Destination 1", 150, 700);
+
+        await this.createCircle(100, 750, "orange");
+        await this.ctx.SetFontAsync("16px Roboto");
+        await this.ctx.SetFillStyleAsync("black");
+        await this.ctx.FillTextAsync($"Destination 2", 150, 750);
     }
 
     private async Task renderPath()
